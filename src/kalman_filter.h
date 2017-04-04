@@ -24,10 +24,10 @@ public:
   Eigen::MatrixXd R_;
 
   /*! Acceleration noise along x axis */
-  float noise_ax;
+  double noise_ax_;
 
   /*! Acceleration noise along y axis */
-  float noise_ay;
+  double noise_ay_;
 
   /**
    * Constructor
