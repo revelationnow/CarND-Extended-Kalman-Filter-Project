@@ -57,8 +57,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   TODO:
     * update the state by using Extended Kalman Filter equations
   */
-  //z(1) = ((z(1) + 6.28318) % 6.28318) - 3.14159;
-  double phi = fmod(z(1) + 6.28318, 6.28318) - 3.14159;
   std::cout << "\n z = " << z << std::endl << std::endl;
 
   VectorXd h_func_x = VectorXd(3);
@@ -66,14 +64,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   h_func_x(1) = atan2(x_(1),x_(0));
   h_func_x(2) = (x_(0)*x_(2) + x_(1)*x_(3))/h_func_x(0);
 
+  if(fabs(h_func_x(0)) < 0.00001)
+  {
+    std::cout<<"Too close to origin, bailing"<<std::endl;
+    return;
+  }
+
   VectorXd y = VectorXd(3);
   y = z - h_func_x;
-  y(1) = fmod(phi - h_func_x(1) + 6.28318, 6.28318) - 3.14159;
 
   std::cout<< "\ny = \n" << y << std::endl<< std::endl;
 
   MatrixXd S = MatrixXd(3,3);
-  S = H_ * P_ * H_.transpose();
+  S = (H_ * P_ * H_.transpose()) + R_;
 
   std::cout<< "\nS = \n" << S << std::endl<< std::endl;
 

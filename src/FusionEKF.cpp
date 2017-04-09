@@ -44,8 +44,8 @@ using std::vector;
          1, 1, 1, 1,
          1, 1, 1, 1;
 
-  ekf_.noise_ax_ = 9;
-  ekf_.noise_ay_ = 9;
+  ekf_.noise_ax_ = 0.89;
+  ekf_.noise_ay_ = 0.009;
 
   ekf_.Q_ = MatrixXd(4,4);
   ekf_.F_ = MatrixXd(4,4);
@@ -116,6 +116,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                1.00000000, 100000000, 1.00000000, 1.00000000,
                1.00000000, 1.00000000, 100000000, 1.00000000,
                1.00000000, 1.00000000, 1.00000000, 100000000;
+    ekf_.P_ << 1000, 1000, 1000, 1000,
+               1000, 1000, 1000, 1000,
+               1000, 1000, 1000, 1000,
+               1000, 1000, 1000, 1000;
     last_time_ = measurement_pack.timestamp_;
 
     // done initializing, no need to predict or update
