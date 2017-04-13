@@ -40,9 +40,9 @@ using std::vector;
   H_laser_ << 1, 0, 0, 0,
               0, 1, 0, 0;
 
-  Hj_ << 1, 1, 0, 0,
-         1, 1, 0, 0,
-         1, 1, 1, 1;
+  Hj_ << 1, 0, 0, 0,
+         0, 1, 0, 0,
+         0, 0, 1, 0;
 
   ekf_.noise_ax_ = 9.0;
   ekf_.noise_ay_ = 9.0;
@@ -63,6 +63,13 @@ using std::vector;
              0, 0, 0, 0,
              0, 0, 0, 0,
              0, 0, 0, 0;
+
+  ekf_.P_ << 1, 0, 0, 0,
+             0, 1, 0, 0,
+             0, 0, 1, 0,
+             0, 0, 0, 1;
+
+  ekf_.x_ << 0, 0, 0, 0;
 
 }
 
@@ -87,7 +94,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: First measurement" << endl;
     ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 0, 0, 1, 1;
+    ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -111,13 +118,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       cout << "EKF: First measurement was LASER" << endl;
       ekf_.x_(0) = measurement_pack.raw_measurements_(0);
       ekf_.x_(1) = measurement_pack.raw_measurements_(1);
+      ekf_.x_(2) = 0;
+      ekf_.x_(3) = 0;
     }
-    ekf_.P_ << 1, 0, 0, 0,
-               0, 1, 0, 0,
-               0, 0, 1000, 0,
-               0, 0, 0, 1000;
+    ekf_.P_ << 0.1, 0, 0, 0,
+               0, 10, 0, 0,
+               0, 0, 0.1, 0,
+               0, 0, 0, 10;
     last_time_ = measurement_pack.timestamp_;
-    last_elapsed_time_ = 0;
+    last_elapsed_time_ = 0.0001;
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
@@ -139,9 +148,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   last_time_ = measurement_pack.timestamp_;
   cout << "Elapsed time = " << elapsed_time << endl;
  
-  if(fabs(elapsed_time) < 0.0001)
+  
+  if(fabs(elapsed_time) < 0.00001)
   {
-    elapsed_time = last_elapsed_time_;
+    elapsed_time = 0.00001;
   }
   else
   {
@@ -153,22 +163,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
              0, 1, 0, elapsed_time,
              0, 0, 1, 0,
              0, 0, 0, 1;
-  ekf_.F_(0,2) = elapsed_time;
-  ekf_.F_(1,3) = elapsed_time;
 
   ekf_.Q_ << pow(elapsed_time,4) * ekf_.noise_ax_ / 4, 0, pow(elapsed_time,3) * ekf_.noise_ax_ / 2, 0,
              0, pow(elapsed_time,4) * ekf_.noise_ay_ / 4, 0, pow(elapsed_time,3) * ekf_.noise_ay_ / 2,
              pow(elapsed_time,3) * ekf_.noise_ax_ / 2, 0, pow(elapsed_time,2) * ekf_.noise_ax_ / 1, 0,
              0, pow(elapsed_time,3) * ekf_.noise_ay_ / 2, 0, pow(elapsed_time,2) * ekf_.noise_ay_ / 1;
-  ekf_.Q_(0,0) = pow(elapsed_time,4) * ekf_.noise_ax_ / 4;
-  ekf_.Q_(0,2) = pow(elapsed_time,3) * ekf_.noise_ax_ / 2;
-  ekf_.Q_(1,1) = pow(elapsed_time,4) * ekf_.noise_ay_ / 4;
-  ekf_.Q_(1,3) = pow(elapsed_time,3) * ekf_.noise_ay_ / 2;
-
-  ekf_.Q_(2,0) = pow(elapsed_time,3) * ekf_.noise_ax_ / 2;
-  ekf_.Q_(2,2) = pow(elapsed_time,2) * ekf_.noise_ax_ / 1;
-  ekf_.Q_(3,1) = pow(elapsed_time,3) * ekf_.noise_ay_ / 2;
-  ekf_.Q_(3,3) = pow(elapsed_time,2) * ekf_.noise_ay_ / 1;
 
   cout << "Before Predict : " << endl << endl;
   cout << "x_ = \n" << ekf_.x_ << endl << endl;

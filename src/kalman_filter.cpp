@@ -64,7 +64,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   if(fabs(h_func_x(0)) < 0.00001)
   {
     h_func_x(0) = 0.00001;
-    h_func_x(1) = z(1);
+    h_func_x(1) = 0;
     h_func_x(2) = (x_(0)*x_(2) + x_(1)*x_(3))/h_func_x(0);
   }
   else
