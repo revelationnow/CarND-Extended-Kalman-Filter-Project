@@ -36,7 +36,7 @@ private:
   bool is_initialized_;
 
   // previous timestamp
-  long previous_timestamp_;
+  long long previous_timestamp_;
 
   // tool object used to compute Jacobian and RMSE
   Tools tools;
@@ -45,6 +45,7 @@ private:
   Eigen::MatrixXd H_laser_;
   Eigen::MatrixXd Hj_;
   long long last_time_;
+  double last_elapsed_time_;
 };
 
 #endif /* FusionEKF_H_ */

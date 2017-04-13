@@ -40,6 +40,8 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     VectorXd diff = (estimations[i] - ground_truth[i]);
 		diff = diff.array() * diff.array();
 		rmse += diff;
+    std::cout<<"Estimations : "<<estimations[i]<<std::endl;
+    std::cout<<"Ground Truth : "<<ground_truth[i]<<std::endl;
 	}
 
 	//calculate the mean
@@ -58,10 +60,10 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
     * Calculate a Jacobian here.
   */
   MatrixXd Hj(3,4);
-  double px = x_state(0) * cos(x_state(1));
-  double py = -1 * x_state(0) * sin(x_state(1));
-  double vx = x_state(2) * cos(x_state(1));
-  double vy = -1 * x_state(2) * sin(x_state(1));
+  double px = x_state(0) ;
+  double py = x_state(1) ;
+  double vx = x_state(2) ;
+  double vy = x_state(3) ;
 /*
   if(fabs(px) < 0.00001)
     px = 0.00001;
@@ -79,9 +81,10 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
     return Hj;
   }
 
-  Hj << (px/c2)               ,(py/c2)            , 0    , 0    ,
-       -1*(py/c1)               ,(px/c1)            , 0    , 0    ,
-        py*(vx*py - vy*px)/c3 , px*(px*vy - py*vx), px/c2, py/c2;
+  Hj << (px/c2)               , (py/c2)               , 0     , 0    ,
+       -1.0*(py/c1)           , (px/c1)               , 0     , 0    ,
+        py*(vx*py - vy*px)/c3 , px*(px*vy - py*vx)/c3 , px/c2 , py/c2;
+
   std::cout<<"\nJacobian matrix : \n" << Hj << std::endl << std::endl;
   return Hj;
 }
